@@ -32,6 +32,7 @@ impl Plugin for InitPlugin {
                     ..default()
                 }),
                 app::timer::TimerPlugin,
+                app::ui::AppUiPlugin,
                 app::settings::SettingsPlugin,
                 app::leaderboard::LeaderboardPlugin,
                 app::achievement::AchievementPlugin,
@@ -39,6 +40,7 @@ impl Plugin for InitPlugin {
                 app::key_binding::KeyBindingPlugin,
                 app::interaction::InteractionPlugin,
                 app::anime_effect::AnimeEffectPlugin,
+                app::cursor::AppCursorPlugin,
             ));
     }
 }

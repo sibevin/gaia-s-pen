@@ -8,7 +8,7 @@ impl AnimeEffectKindBase for AnimeEffectKindLineQ {
     fn create(&self, commands: &mut Commands, param: AnimeEffectParam) -> Entity {
         let root_entity = commands
             .spawn((SpriteBundle {
-                transform: Transform::from_xyz(0.0, 0.0, 0.0),
+                transform: Transform::from_xyz(0.0, 0.0, ANIME_EFFECT_CANVAS_Z_INDEX),
                 sprite: Sprite { ..default() },
                 ..default()
             },))
@@ -47,7 +47,11 @@ impl AnimeEffectKindBase for AnimeEffectKindLineQ {
                     if !ae.segments.is_empty() {
                         parent
                             .spawn((SpriteBundle {
-                                transform: Transform::from_xyz(0.0, 0.0, ae.layer as f32 + 0.1),
+                                transform: Transform::from_xyz(
+                                    0.0,
+                                    0.0,
+                                    ANIME_EFFECT_CANVAS_Z_INDEX + ae.layer as f32 * 0.001 + 0.0001,
+                                ),
                                 sprite: Sprite { ..default() },
                                 ..default()
                             },))
@@ -80,7 +84,11 @@ impl AnimeEffectKindBase for AnimeEffectKindLineQ {
                             });
                         parent
                             .spawn((SpriteBundle {
-                                transform: Transform::from_xyz(0.0, 0.0, ae.layer as f32 + 0.2),
+                                transform: Transform::from_xyz(
+                                    0.0,
+                                    0.0,
+                                    ANIME_EFFECT_CANVAS_Z_INDEX + ae.layer as f32 * 0.001 + 0.0002,
+                                ),
                                 sprite: Sprite { ..default() },
                                 ..default()
                             },))
@@ -105,7 +113,13 @@ impl AnimeEffectKindBase for AnimeEffectKindLineQ {
                         if ae.delta > 0.98 {
                             parent
                                 .spawn((SpriteBundle {
-                                    transform: Transform::from_xyz(0.0, 0.0, ae.layer as f32 + 0.3),
+                                    transform: Transform::from_xyz(
+                                        0.0,
+                                        0.0,
+                                        ANIME_EFFECT_CANVAS_Z_INDEX
+                                            + ae.layer as f32 * 0.001
+                                            + 0.0003,
+                                    ),
                                     sprite: Sprite { ..default() },
                                     ..default()
                                 },))

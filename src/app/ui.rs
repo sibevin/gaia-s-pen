@@ -1,6 +1,25 @@
 use crate::{app, app::theme::*};
 use bevy::prelude::*;
+use bevy_prototype_lyon::prelude::*;
 use bevy_ui_navigation::prelude::*;
+
+mod builder;
+mod plugin;
+mod switch_btn;
+mod timer;
+
+pub use builder::build_ui_canvas;
+pub use builder::clear_ui_canvas;
+pub use builder::slider::build_slider_ui;
+pub use builder::slider::handle_slider_mouse_clicking;
+pub use builder::slider::handle_slider_mouse_dragging;
+pub use builder::slider::refresh_slider_display;
+pub use builder::slider::SliderChangedEvent;
+pub use builder::AppUiCanvasEntityMap;
+pub use plugin::AppUiPlugin;
+pub use switch_btn::build_switch_btn;
+pub use switch_btn::update_switch_btn_display;
+pub use switch_btn::SwitchButton;
 
 pub const FONT_SIZE: f32 = 36.0;
 pub const BTN_FS: f32 = FONT_SIZE;
@@ -20,9 +39,6 @@ pub fn despawn_ui<T: Component>(to_despawn: Query<Entity, With<T>>, mut commands
         commands.entity(entity).despawn_recursive();
     }
 }
-
-#[derive(Component)]
-pub struct BtnCanvas;
 
 pub fn build_btn(
     parent: &mut ChildBuilder,
@@ -241,9 +257,6 @@ pub fn build_link(
     };
     entity.id()
 }
-
-#[derive(Component)]
-pub struct SwitchButton;
 
 #[derive(Component)]
 pub struct RangeButton;

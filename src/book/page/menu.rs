@@ -50,7 +50,12 @@ enum ButtonAction {
     Quit,
 }
 
-const MENU_PAGES: [&dyn PageBase; 4] = [&game::Page, &help::Page, &settings::Page, &about::Page];
+const MENU_PAGES: [&dyn PageBase; 4] = [
+    &game::Page,
+    &help::Page,
+    &settings_audio::Page,
+    &about::Page,
+];
 
 fn page_enter(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands

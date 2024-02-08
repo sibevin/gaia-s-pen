@@ -6,7 +6,7 @@ impl AnimeEffectKindBase for AnimeEffectKindCircleQ {
     fn create(&self, commands: &mut Commands, param: AnimeEffectParam) -> Entity {
         let root_entity = commands
             .spawn((SpriteBundle {
-                transform: Transform::from_xyz(0.0, 0.0, 0.0),
+                transform: Transform::from_xyz(0.0, 0.0, ANIME_EFFECT_CANVAS_Z_INDEX),
                 sprite: Sprite { ..default() },
                 ..default()
             },))
@@ -45,7 +45,11 @@ impl AnimeEffectKindBase for AnimeEffectKindCircleQ {
                     if !ae.segments.is_empty() {
                         parent
                             .spawn((SpriteBundle {
-                                transform: Transform::from_xyz(0.0, 0.0, ae.layer as f32 + 0.1),
+                                transform: Transform::from_xyz(
+                                    0.0,
+                                    0.0,
+                                    ANIME_EFFECT_CANVAS_Z_INDEX + ae.layer as f32 * 0.001 + 0.0001,
+                                ),
                                 sprite: Sprite { ..default() },
                                 ..default()
                             },))
@@ -83,7 +87,7 @@ impl AnimeEffectKindBase for AnimeEffectKindCircleQ {
                                 transform: Transform::from_xyz(
                                     ae.pos_1.x,
                                     ae.pos_1.y,
-                                    ae.layer as f32 + 0.2,
+                                    ANIME_EFFECT_CANVAS_Z_INDEX + ae.layer as f32 * 0.001 + 0.0002,
                                 )
                                 .with_rotation(Quat::from_rotation_z(start_angle - angle * 2.0)),
                                 sprite: Sprite { ..default() },
@@ -112,7 +116,13 @@ impl AnimeEffectKindBase for AnimeEffectKindCircleQ {
                         if ae.delta > 0.98 {
                             parent
                                 .spawn((SpriteBundle {
-                                    transform: Transform::from_xyz(0.0, 0.0, ae.layer as f32 + 0.3),
+                                    transform: Transform::from_xyz(
+                                        0.0,
+                                        0.0,
+                                        ANIME_EFFECT_CANVAS_Z_INDEX
+                                            + ae.layer as f32 * 0.001
+                                            + 0.0002,
+                                    ),
                                     sprite: Sprite { ..default() },
                                     ..default()
                                 },))

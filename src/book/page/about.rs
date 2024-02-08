@@ -22,20 +22,27 @@ impl PageBase for Page {
         PageState::About
     }
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(self.state()), page_enter)
-            .add_systems(
-                Update,
-                (handle_ui_navigation, handle_hidden_button_click)
-                    .after(NavRequestSystem)
-                    .run_if(in_state(self.state())),
+        app.add_systems(
+            OnEnter(self.state()),
+            (app::interaction::reset_default_focus, page_enter),
+        )
+        .add_systems(
+            Update,
+            (
+                handle_ui_navigation,
+                handle_hidden_button_click,
+                app::interaction::handle_default_focus,
             )
-            .add_systems(
-                OnExit(self.state()),
-                (
-                    app::anime_effect::clear_anime_effect,
-                    app::ui::despawn_ui::<OnPage>,
-                ),
-            );
+                .after(NavRequestSystem)
+                .run_if(in_state(self.state())),
+        )
+        .add_systems(
+            OnExit(self.state()),
+            (
+                app::anime_effect::clear_anime_effect,
+                app::ui::despawn_ui::<OnPage>,
+            ),
+        );
     }
 }
 
@@ -301,7 +308,12 @@ fn page_enter(mut commands: Commands, asset_server: Res<AssetServer>) {
                 app::ui::build_icon_btn(
                     parent,
                     &asset_server,
-                    (ButtonAction::MoveToPage(PageState::Menu), app::interaction::IaButton,Focusable::new().prioritized()),
+                    (
+                        ButtonAction::MoveToPage(PageState::Menu),
+                        app::interaction::IaButton,
+                        Focusable::default(),
+                        app::interaction::IaDefaultFocus
+                    ),
                     Style {
                         position_type: PositionType::Absolute,
                         bottom: app::ui::px_p(app::ui::PAGE_PADDING),

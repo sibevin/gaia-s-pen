@@ -6,6 +6,7 @@ pub mod game;
 pub mod help;
 pub mod menu;
 pub mod settings;
+pub mod settings_audio;
 
 pub trait PageBase {
     fn code(&self) -> &str;
@@ -45,14 +46,18 @@ fn build_page_layout() -> NodeBundle {
     }
 }
 
+const GAME_TITLE_ICON_SIZE: f32 = 80.0; // px
+const GAME_TITLE_FONT_RATIO: f32 = 1.6;
+
 fn build_game_title(parent: &mut ChildBuilder, asset_server: &Res<AssetServer>) {
     parent
         .spawn(NodeBundle {
             style: Style {
                 position_type: PositionType::Absolute,
-                left: Val::Px(0.0),
-                flex_direction: FlexDirection::Row,
-                align_items: AlignItems::Start,
+                top: ui::px_p(ui::PAGE_PADDING),
+                left: ui::px_p(ui::PAGE_PADDING),
+                align_items: AlignItems::Center,
+                column_gap: ui::px_p(2.0),
                 ..default()
             },
             ..default()
@@ -61,9 +66,8 @@ fn build_game_title(parent: &mut ChildBuilder, asset_server: &Res<AssetServer>) 
             let icon = asset_server.load("images/app/logo.png");
             parent.spawn(ImageBundle {
                 style: Style {
-                    width: Val::Px(80.0),
-                    height: Val::Px(80.0),
-                    margin: UiRect::right(ui::px_p(2.0)),
+                    width: Val::Px(GAME_TITLE_ICON_SIZE),
+                    height: Val::Px(GAME_TITLE_ICON_SIZE),
                     ..default()
                 },
                 image: UiImage::new(icon),
@@ -73,8 +77,8 @@ fn build_game_title(parent: &mut ChildBuilder, asset_server: &Res<AssetServer>) 
                 TextBundle::from_section(
                     app::APP_NAME,
                     TextStyle {
-                        font: asset_server.load(FONT),
-                        font_size: ui::FONT_SIZE * 2.0,
+                        font: asset_server.load(FONT_TITLE),
+                        font_size: ui::FONT_SIZE * GAME_TITLE_FONT_RATIO,
                         color: FG_COLOR,
                     },
                 )
@@ -96,7 +100,8 @@ fn build_page_title(
         .spawn((NodeBundle {
             style: Style {
                 position_type: PositionType::Absolute,
-                right: Val::Px(0.0),
+                top: ui::px_p(ui::PAGE_PADDING),
+                right: ui::px_p(ui::PAGE_PADDING),
                 height: Val::Auto,
                 justify_content: JustifyContent::SpaceBetween,
                 align_items: AlignItems::Center,

@@ -3,6 +3,8 @@ use crate::app::anime_effect::*;
 pub mod circle_q;
 pub mod line_q;
 
+const ANIME_EFFECT_CANVAS_Z_INDEX: f32 = 1.0;
+
 pub trait AnimeEffectKindBase {
     fn create(&self, commands: &mut Commands, param: AnimeEffectParam) -> Entity;
     fn draw(&self, commands: &mut Commands, ae: &mut AnimeEffect);

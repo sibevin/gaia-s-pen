@@ -11,16 +11,20 @@ pub enum PageState {
     Menu,
     Game,
     Settings,
+    SettingsAudio,
+    SettingsControl,
+    SettingsDisplay,
     About,
     Help,
     Dev,
 }
 
-pub const PAGES: [&dyn page::PageBase; 6] = [
+pub const PAGES: [&dyn page::PageBase; 7] = [
     &page::menu::Page,
     &page::game::Page,
     &page::settings::Page,
     &page::help::Page,
     &page::about::Page,
     &page::dev::Page,
+    &page::settings_audio::Page,
 ];

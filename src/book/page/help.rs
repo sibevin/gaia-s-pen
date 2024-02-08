@@ -22,17 +22,20 @@ impl PageBase for Page {
         PageState::Help
     }
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(self.state()), page_enter)
-            .add_systems(
-                Update,
-                handle_ui_navigation
-                    .after(NavRequestSystem)
-                    .run_if(in_state(self.state())),
-            )
-            .add_systems(
-                OnExit(self.state()),
-                (anime_effect::clear_anime_effect, ui::despawn_ui::<OnPage>),
-            );
+        app.add_systems(
+            OnEnter(self.state()),
+            (app::interaction::reset_default_focus, page_enter),
+        )
+        .add_systems(
+            Update,
+            (handle_ui_navigation, app::interaction::handle_default_focus)
+                .after(NavRequestSystem)
+                .run_if(in_state(self.state())),
+        )
+        .add_systems(
+            OnExit(self.state()),
+            (anime_effect::clear_anime_effect, ui::despawn_ui::<OnPage>),
+        );
     }
 }
 
@@ -127,7 +130,8 @@ fn page_enter(
                                 (
                                     ButtonAction::NextHelp,
                                     app::interaction::IaButton,
-                                    Focusable::new().prioritized(),
+                                    Focusable::default(),
+                                    app::interaction::IaDefaultFocus,
                                 ),
                                 Style::default(),
                                 "caret-double-right",
@@ -148,7 +152,7 @@ fn page_enter(
                     left: ui::px_p(ui::PAGE_PADDING),
                     ..default()
                 },
-                "arrow-left",
+                "arrow-left-bold_x1.5",
             );
             ui::build_btn(
                 parent,
