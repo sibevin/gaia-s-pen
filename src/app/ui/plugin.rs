@@ -12,6 +12,10 @@ impl Plugin for AppUiPlugin {
             timer::UI_BUILD_DELAY_SECS,
             TimerMode::Once,
         )))
-        .add_event::<SliderChangedEvent>();
+        .insert_resource(timer::AppUiThrottleTimer(Timer::from_seconds(
+            timer::UI_THROTTLE_SECS,
+            TimerMode::Repeating,
+        )))
+        .add_event::<AppUiEvent>();
     }
 }

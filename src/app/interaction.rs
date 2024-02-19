@@ -13,6 +13,7 @@ pub use default_focus::handle_default_focus;
 pub use default_focus::reset_default_focus;
 pub use default_focus::IaDefaultFocus;
 pub use handle::IaButton;
+pub use handle::IaCrossPanel;
 pub use handle::IaLink;
 pub use handle::IaSlider;
 pub use handle::IaSwitch;

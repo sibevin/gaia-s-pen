@@ -17,6 +17,9 @@ pub struct IaSlider;
 pub struct IaLink;
 
 #[derive(Component)]
+pub struct IaCrossPanel;
+
+#[derive(Component)]
 pub struct IaAnimeEffect;
 
 #[derive(Default)]
@@ -175,6 +178,32 @@ pub fn handle_link_interaction(
             },
             IaAnimeEffect,
         );
+    }
+}
+
+type FocusableCrossPanel = (Changed<Focusable>, With<IaCrossPanel>);
+
+pub fn handle_cross_panel_interaction(
+    mut commands: Commands,
+    mut focusables: Query<(&Focusable, &GlobalTransform, &Node), FocusableCrossPanel>,
+    ae_query: Query<Entity, With<IaAnimeEffect>>,
+    mut ae_status: ResMut<AnimeEffectStatus>,
+    window: Query<&Window>,
+) {
+    let mut target: Option<FocusTarget> = None;
+    for (focus, g_trans, node) in focusables.iter_mut() {
+        if matches!(focus.state(), FocusState::Focused) {
+            target = Some(fetch_focus_target(&window, g_trans, node));
+        } else {
+            for ae_entity in ae_query.iter() {
+                despawn_anime_effect(ae_entity, &mut ae_status);
+            }
+        }
+    }
+    if let Some(target) = target {
+        if target.size.x > 0.0 && target.size.y > 0.0 {
+            draw_focus(&mut commands, target);
+        }
     }
 }
 

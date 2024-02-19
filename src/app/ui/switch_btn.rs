@@ -66,6 +66,24 @@ pub fn build_switch_btn(
         .id()
 }
 
+pub fn update_switch_btn_value(
+    entity: Entity,
+    switch_btn_query: &mut Query<(&Parent, &mut UiImage, &mut SwitchButton)>,
+    asset_server: &Res<AssetServer>,
+    value: bool,
+) {
+    for (parent, mut icon_image, mut sbi) in switch_btn_query.iter_mut() {
+        if parent.get() == entity {
+            sbi.0 = value;
+            icon_image.texture = if value {
+                asset_server.load("images/icons/toggle-left-fill.png")
+            } else {
+                asset_server.load("images/icons/toggle-right-fill.png")
+            };
+        }
+    }
+}
+
 pub fn update_switch_btn_display(
     children: &Children,
     switch_btn_query: &mut Query<(Entity, &mut UiImage, &mut SwitchButton)>,

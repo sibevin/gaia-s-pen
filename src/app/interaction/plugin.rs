@@ -15,6 +15,7 @@ impl Plugin for InteractionPlugin {
                 handle::handle_switch_interaction,
                 handle::handle_slider_interaction,
                 handle::handle_link_interaction,
+                handle::handle_cross_panel_interaction,
             )
                 .after(NavRequestSystem),
         );
