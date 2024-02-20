@@ -19,12 +19,13 @@ pub enum PageState {
     Dev,
 }
 
-pub const PAGES: [&dyn page::PageBase; 7] = [
+pub const PAGES: [&dyn page::PageBase; 8] = [
     &page::menu::Page,
     &page::game::Page,
-    &page::settings::Page,
     &page::help::Page,
     &page::about::Page,
     &page::dev::Page,
-    &page::settings_audio::Page,
+    &page::settings::audio::Page,
+    &page::settings::control::Page,
+    &page::settings::display::Page,
 ];

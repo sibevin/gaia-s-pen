@@ -6,7 +6,6 @@ pub mod game;
 pub mod help;
 pub mod menu;
 pub mod settings;
-pub mod settings_audio;
 
 pub trait PageBase {
     fn code(&self) -> &str;
@@ -31,7 +30,7 @@ fn fetch_page_icon_path(code: &str) -> String {
 }
 
 const PAGE_TITLE_RATIO: f32 = 1.2;
-const SEP_W: f32 = 300.0;
+const SEP_W: f32 = 100.0;
 
 fn build_page_layout() -> NodeBundle {
     NodeBundle {
@@ -151,7 +150,7 @@ fn build_sep_title(
     parent
         .spawn((NodeBundle {
             style: Style {
-                width: Val::Px(SEP_W),
+                width: ui::px_p(SEP_W),
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::Center,
                 margin: UiRect::top(ui::px_p(5.0)),
@@ -163,7 +162,7 @@ fn build_sep_title(
             parent.spawn((NodeBundle {
                 style: Style {
                     position_type: PositionType::Absolute,
-                    width: Val::Px(SEP_W),
+                    width: ui::px_p(SEP_W),
                     height: ui::px_p(0.4),
                     margin: UiRect::top(ui::px_p(3.0)),
                     ..default()

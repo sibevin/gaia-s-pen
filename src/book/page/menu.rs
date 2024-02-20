@@ -53,7 +53,7 @@ enum ButtonAction {
 const MENU_PAGES: [&dyn PageBase; 4] = [
     &game::Page,
     &help::Page,
-    &settings_audio::Page,
+    &settings::audio::Page,
     &about::Page,
 ];
 

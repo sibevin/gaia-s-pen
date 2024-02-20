@@ -1,9 +1,9 @@
-use crate::{app::anime_effect, app::interaction, app::ui, book::page::*};
-use bevy::window::WindowMode;
+use super::*;
+use crate::{app::anime_effect, app::interaction, app::ui};
 use bevy_persistent::prelude::*;
-use bevy_ui_navigation::{prelude::*, NavRequestSystem};
+use bevy_ui_navigation::NavRequestSystem;
 
-const PAGE_CODE: &str = "settings_audio";
+const PAGE_CODE: &str = "settings_control";
 const PAGE_NAME: &str = "Settings";
 const PAGE_ICON: &str = "gear";
 
@@ -20,7 +20,7 @@ impl PageBase for Page {
         PAGE_ICON
     }
     fn state(&self) -> PageState {
-        PageState::SettingsAudio
+        PageState::SettingsControl
     }
     fn build(&self, app: &mut App) {
         app.add_systems(
@@ -69,13 +69,7 @@ struct InteractionDefaultFocus;
 #[derive(Component)]
 struct OnPage;
 
-#[derive(Component, Debug)]
-enum ButtonAction {
-    BackToMainMenu,
-    AppUiNav,
-    Toggle(String),
-    PlaySe,
-}
+const DEMO_PANEL_SIZE: f32 = 72.0;
 
 fn page_enter(
     mut commands: Commands,
@@ -84,7 +78,6 @@ fn page_enter(
 ) {
     let se_slider_canvas = ui::create_ui_canvas(&mut commands);
     let bgm_slider_canvas = ui::create_ui_canvas(&mut commands);
-    let audio_cross_panel_canvas = ui::create_ui_canvas(&mut commands);
     commands
         .spawn((build_page_layout(), OnPage))
         .with_children(|parent| {
@@ -109,66 +102,12 @@ fn page_enter(
                                 flex_direction: FlexDirection::Column,
                                 align_items: AlignItems::Center,
                                 justify_content: JustifyContent::Center,
-                                margin: UiRect::top(ui::px_p(24.0)),
                                 ..default()
                             },
                             ..default()
                         })
                         .with_children(|parent| {
-                            build_sep_title(parent, &asset_server, "BGM", "music-notes-fill");
-                            ui::build_switch_btn(
-                                parent,
-                                &asset_server,
-                                ButtonAction::Toggle(String::from("bgm")),
-                                settings.is_enabled("bgm"),
-                            );
-                            ui::build_ui(
-                                parent,
-                                &asset_server,
-                                ButtonAction::AppUiNav,
-                                bgm_slider_canvas,
-                                ui::AppUiInitParams::Slider {
-                                    data: ui::AppUiTargetValuePair {
-                                        target: String::from("bgm"),
-                                        value: settings.get_value("bgm"),
-                                    },
-                                },
-                            );
-                            parent
-                                .spawn(NodeBundle {
-                                    style: Style {
-                                        flex_direction: FlexDirection::Column,
-                                        align_items: AlignItems::Center,
-                                        margin: UiRect::all(ui::px_p(12.0)),
-                                        ..default()
-                                    },
-                                    ..default()
-                                })
-                                .with_children(|parent| {
-                                    ui::build_ui(
-                                        parent,
-                                        &asset_server,
-                                        ButtonAction::AppUiNav,
-                                        audio_cross_panel_canvas,
-                                        ui::AppUiInitParams::CrossPanel {
-                                            x: ui::AppUiTargetValuePair {
-                                                target: String::from("bgm"),
-                                                value: settings.get_value("bgm"),
-                                            },
-                                            y: ui::AppUiTargetValuePair {
-                                                target: String::from("se"),
-                                                value: settings.get_value("se"),
-                                            },
-                                        },
-                                    );
-                                });
-                            build_sep_title(parent, &asset_server, "SE", "waveform-fill");
-                            ui::build_switch_btn(
-                                parent,
-                                &asset_server,
-                                ButtonAction::Toggle(String::from("se")),
-                                settings.is_enabled("se"),
-                            );
+                            build_sep_title(parent, &asset_server, "Sensitivity", "gauge-fill");
                             parent
                                 .spawn(NodeBundle {
                                     style: Style {
@@ -179,6 +118,56 @@ fn page_enter(
                                     ..default()
                                 })
                                 .with_children(|parent| {
+                                    parent.spawn(TextBundle::from_section(
+                                        "Default",
+                                        TextStyle {
+                                            font: asset_server.load(FONT),
+                                            font_size: ui::FONT_SIZE,
+                                            color: FG_COLOR,
+                                        },
+                                    ));
+                                    ui::build_ui(
+                                        parent,
+                                        &asset_server,
+                                        ButtonAction::AppUiNav,
+                                        bgm_slider_canvas,
+                                        ui::AppUiInitParams::Slider {
+                                            data: ui::AppUiTargetValuePair {
+                                                target: String::from("sensitivity"),
+                                                value: settings.get_value("sensitivity"),
+                                            },
+                                        },
+                                    );
+                                });
+                            parent
+                                .spawn(NodeBundle {
+                                    style: Style {
+                                        align_items: AlignItems::Center,
+                                        column_gap: ui::px_p(4.0),
+                                        ..default()
+                                    },
+                                    ..default()
+                                })
+                                .with_children(|parent| {
+                                    let icon =
+                                        asset_server.load("images/icons/arrow-fat-up-fill.png");
+                                    parent.spawn(ImageBundle {
+                                        style: Style {
+                                            width: Val::Px(ui::ICON_SIZE),
+                                            height: Val::Px(ui::ICON_SIZE),
+                                            ..default()
+                                        },
+                                        image: UiImage::new(icon),
+                                        ..default()
+                                    });
+                                    parent.spawn(TextBundle::from_section(
+                                        "Shift",
+                                        TextStyle {
+                                            font: asset_server.load(FONT),
+                                            font_size: ui::FONT_SIZE,
+                                            color: FG_COLOR,
+                                        },
+                                    ));
                                     ui::build_ui(
                                         parent,
                                         &asset_server,
@@ -186,43 +175,22 @@ fn page_enter(
                                         se_slider_canvas,
                                         ui::AppUiInitParams::Slider {
                                             data: ui::AppUiTargetValuePair {
-                                                target: String::from("se"),
-                                                value: settings.get_value("se"),
+                                                target: String::from("sensitivity_modified"),
+                                                value: settings.get_value("sensitivity_modified"),
                                             },
                                         },
                                     );
-                                    ui::build_btn(
-                                        parent,
-                                        &asset_server,
-                                        (
-                                            ButtonAction::PlaySe,
-                                            app::interaction::IaButton,
-                                            Focusable::default(),
-                                        ),
-                                        Style {
-                                            padding: UiRect::all(ui::px_p(ui::BTN_PADDING)),
-                                            ..default()
-                                        },
-                                        None,
-                                        Some("play"),
-                                    );
                                 });
+                            parent.spawn(NodeBundle {
+                                style: Style {
+                                    width: ui::px_p(DEMO_PANEL_SIZE),
+                                    height: ui::px_p(DEMO_PANEL_SIZE),
+                                    ..default()
+                                },
+                                ..default()
+                            });
                         });
-                    ui::build_icon_btn(
-                        parent,
-                        &asset_server,
-                        (
-                            ButtonAction::BackToMainMenu,
-                            app::interaction::IaButton,
-                            Focusable::default(),
-                            app::interaction::IaDefaultFocus,
-                        ),
-                        Style {
-                            align_self: AlignSelf::Start,
-                            ..default()
-                        },
-                        "arrow-left-bold_x1.5",
-                    );
+                    build_settings_nav_bar(parent, &asset_server, PageState::SettingsControl);
                 });
         });
 }
@@ -268,7 +236,6 @@ fn handle_ui_navigation(
     mut nav_events: EventReader<NavEvent>,
     mut page_state: ResMut<NextState<PageState>>,
     mut settings: ResMut<Persistent<app::settings::Settings>>,
-    mut window_query: Query<&mut Window>,
     mut ui_query: Query<(Entity, &mut ui::AppUiData), With<ui::AppUiData>>,
     audio_bgm_query: Query<&AudioSink, With<app::audio::AudioBgm>>,
     audio_se_asset: Res<app::audio::AudioSeAsset>,
@@ -294,20 +261,11 @@ fn handle_ui_navigation(
                                         &asset_server,
                                         is_enabled,
                                     );
-                                    if target == "fullscreen" {
-                                        let mut window = window_query.single_mut();
+                                    if let Ok(sink) = audio_bgm_query.get_single() {
                                         if is_enabled {
-                                            window.mode = WindowMode::Fullscreen
+                                            sink.play();
                                         } else {
-                                            window.mode = WindowMode::Windowed
-                                        }
-                                    } else if target == "bgm" {
-                                        if let Ok(sink) = audio_bgm_query.get_single() {
-                                            if is_enabled {
-                                                sink.play();
-                                            } else {
-                                                sink.pause();
-                                            }
+                                            sink.pause();
                                         }
                                     }
                                 }
@@ -319,7 +277,7 @@ fn handle_ui_navigation(
                                         settings.as_ref(),
                                     );
                                 }
-                                ButtonAction::BackToMainMenu => page_state.set(PageState::Menu),
+                                ButtonAction::MoveToPage(state) => page_state.set(*state),
                                 _ => (),
                             }
                         }
@@ -333,43 +291,4 @@ fn handle_ui_navigation(
             _ => (),
         }
     }
-    // events.nav_iter().activated_in_query_foreach_mut(
-    //     &mut action_query,
-    //     |(mut action, children)| match &mut *action {
-    //         ButtonAction::Toggle(target) => {
-    //             ui::update_switch_btn_display(children, &mut switch_btn_query, &asset_server);
-    //             settings
-    //                 .update(|settings| {
-    //                     settings.toggle(target.as_ref());
-    //                 })
-    //                 .expect("failed to update boolean switch");
-    //             let is_enabled = settings.is_enabled(target);
-    //             if target == "fullscreen" {
-    //                 let mut window = window_query.single_mut();
-    //                 if is_enabled {
-    //                     window.mode = WindowMode::Fullscreen
-    //                 } else {
-    //                     window.mode = WindowMode::Windowed
-    //                 }
-    //             } else if target == "bgm" {
-    //                 if let Ok(sink) = audio_bgm_query.get_single() {
-    //                     if is_enabled {
-    //                         sink.play();
-    //                     } else {
-    //                         sink.pause();
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //         ButtonAction::PlaySe => {
-    //             app::audio::play_se(
-    //                 app::audio::AudioSe::Boom,
-    //                 &mut commands,
-    //                 &audio_se_asset,
-    //                 settings.as_ref(),
-    //             );
-    //         }
-    //         ButtonAction::BackToMainMenu => page_state.set(PageState::Menu),
-    //     },
-    // );
 }
