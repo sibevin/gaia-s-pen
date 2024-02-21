@@ -31,7 +31,7 @@ pub enum AnimeEffectKind {
 #[derive(Component)]
 pub struct AnimeEffect {
     pub kind: AnimeEffectKind,
-    pub segments: Vec<[Vec2; 3]>,
+    pub segments: Vec<[Vec2; 4]>,
     pub pos_1: Vec2,
     pub pos_2: Vec2,
     pub layer: u64,

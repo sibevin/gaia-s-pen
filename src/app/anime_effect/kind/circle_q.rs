@@ -1,17 +1,17 @@
-use crate::app::{anime_effect::kind::*, theme::*};
+use super::*;
+use crate::app::theme::*;
 
 pub struct AnimeEffectKindCircleQ;
 
 impl AnimeEffectKindBase for AnimeEffectKindCircleQ {
     fn create(&self, commands: &mut Commands, param: AnimeEffectParam) -> Entity {
         let root_entity = commands
-            .spawn((SpriteBundle {
+            .spawn((SpatialBundle {
                 transform: Transform::from_xyz(0.0, 0.0, ANIME_EFFECT_CANVAS_Z_INDEX),
-                sprite: Sprite { ..default() },
                 ..default()
             },))
             .id();
-        let segments: Vec<[Vec2; 3]> = build_segements(param.pos_1, param.pos_2);
+        let segments: Vec<[Vec2; 4]> = build_segements(param.pos_1, param.pos_2);
         let ae = AnimeEffect {
             kind: param.kind,
             segments,
@@ -44,13 +44,12 @@ impl AnimeEffectKindBase for AnimeEffectKindCircleQ {
                     let mut last_pos = Vec2::default();
                     if !ae.segments.is_empty() {
                         parent
-                            .spawn((SpriteBundle {
+                            .spawn((SpatialBundle {
                                 transform: Transform::from_xyz(
                                     0.0,
                                     0.0,
                                     ANIME_EFFECT_CANVAS_Z_INDEX + ae.layer as f32 * 0.001 + 0.0001,
                                 ),
-                                sprite: Sprite { ..default() },
                                 ..default()
                             },))
                             .with_children(|parent| {
@@ -82,64 +81,59 @@ impl AnimeEffectKindBase for AnimeEffectKindCircleQ {
                             });
                         let start_angle = -PI / 2.0;
                         let angle = PI * 1.98 * ae.delta;
-                        parent
-                            .spawn((SpriteBundle {
-                                transform: Transform::from_xyz(
-                                    ae.pos_1.x,
-                                    ae.pos_1.y,
-                                    ANIME_EFFECT_CANVAS_Z_INDEX + ae.layer as f32 * 0.001 + 0.0002,
-                                )
-                                .with_rotation(Quat::from_rotation_z(start_angle - angle * 2.0)),
-                                sprite: Sprite { ..default() },
-                                ..default()
-                            },))
-                            .with_children(|parent| {
-                                let mut path_builder = PathBuilder::new();
-                                path_builder.move_to(Vec2::ZERO);
-                                path_builder
-                                    .line_to(Vec2::from_angle(angle * 2.0) * ae.radius * 1.2);
-                                path_builder.arc(
-                                    Vec2::ZERO,
-                                    Vec2::new(ae.radius * 1.2, ae.radius * 1.2),
-                                    PI * 2.0 - angle,
-                                    0.0,
-                                );
-                                path_builder.close();
-                                parent.spawn((
-                                    ShapeBundle {
-                                        path: path_builder.build(),
-                                        ..default()
-                                    },
-                                    Fill::color(BG_COLOR),
-                                ));
-                            });
-                        if ae.delta > 0.98 {
-                            parent
-                                .spawn((SpriteBundle {
+                        let mut path_builder = PathBuilder::new();
+                        path_builder.move_to(Vec2::ZERO);
+                        path_builder.line_to(Vec2::from_angle(angle * 2.0) * ae.radius * 1.2);
+                        path_builder.arc(
+                            Vec2::ZERO,
+                            Vec2::new(ae.radius * 1.2, ae.radius * 1.2),
+                            PI * 2.0 - angle,
+                            0.0,
+                        );
+                        path_builder.close();
+                        parent.spawn((
+                            ShapeBundle {
+                                path: path_builder.build(),
+                                spatial: SpatialBundle {
                                     transform: Transform::from_xyz(
-                                        0.0,
-                                        0.0,
+                                        ae.pos_1.x,
+                                        ae.pos_1.y,
                                         ANIME_EFFECT_CANVAS_Z_INDEX
                                             + ae.layer as f32 * 0.001
                                             + 0.0002,
+                                    )
+                                    .with_rotation(
+                                        Quat::from_rotation_z(start_angle - angle * 2.0),
                                     ),
-                                    sprite: Sprite { ..default() },
                                     ..default()
-                                },))
-                                .with_children(|parent| {
-                                    let circle = shapes::Circle {
-                                        radius: ae.width / 2.0,
-                                        center: last_pos,
-                                    };
-                                    let geo_builder = GeometryBuilder::new().add(&circle);
-                                    parent.spawn((
-                                        ShapeBundle {
-                                            path: geo_builder.build(),
-                                            ..default()
-                                        },
-                                        Fill::color(ae.color),
-                                    ));
-                                });
+                                },
+                                ..default()
+                            },
+                            Fill::color(BG_COLOR),
+                        ));
+                        if ae.delta > 0.98 {
+                            let circle = shapes::Circle {
+                                radius: ae.width / 2.0,
+                                center: last_pos,
+                            };
+                            let geo_builder = GeometryBuilder::new().add(&circle);
+                            parent.spawn((
+                                ShapeBundle {
+                                    path: geo_builder.build(),
+                                    spatial: SpatialBundle {
+                                        transform: Transform::from_xyz(
+                                            0.0,
+                                            0.0,
+                                            ANIME_EFFECT_CANVAS_Z_INDEX
+                                                + ae.layer as f32 * 0.001
+                                                + 0.0002,
+                                        ),
+                                        ..default()
+                                    },
+                                    ..default()
+                                },
+                                Fill::color(ae.color),
+                            ));
                         }
                     }
                 });
@@ -150,8 +144,8 @@ impl AnimeEffectKindBase for AnimeEffectKindCircleQ {
 
 const DRAW_START_ANGLE: f32 = -PI / 9.0;
 
-fn build_segements(pos_1: Vec2, pos_2: Vec2) -> Vec<[Vec2; 3]> {
-    let mut segments: Vec<[Vec2; 3]> = vec![];
+fn build_segements(pos_1: Vec2, pos_2: Vec2) -> Vec<[Vec2; 4]> {
+    let mut segments: Vec<[Vec2; 4]> = vec![];
     let circle_vec = Vec2::new(0.0, -1.0);
     let radius = (pos_2 - pos_1).length();
     let noise_radius = radius * 0.2;
@@ -174,7 +168,7 @@ fn build_segements(pos_1: Vec2, pos_2: Vec2) -> Vec<[Vec2; 3]> {
             noise_radius,
         );
         let middle_pos = (ctrl_pos_1 + ctrl_pos_2) / 2.0;
-        segments.push([prev_pos, ctrl_pos_1, middle_pos]);
+        segments.push([prev_pos, ctrl_pos_1, middle_pos, Vec2::ZERO]);
         prev_pos = middle_pos;
         prev_ctrl = ctrl_pos_2;
     }
