@@ -9,6 +9,7 @@ pub const BTN_BG: Color = Color::rgba(0.0, 0.0, 0.0, 0.0);
 pub const BTN_HOVERED_BG: Color = SECONDARY_COLOR;
 pub const BTN_PRESSED_BG: Color = SECONDARY_COLOR;
 pub const LINK_BG: Color = Color::rgba(0.0, 0.0, 0.0, 0.0);
+pub const CONTROL_COLOR: Color = Color::rgb(0.463, 0.529, 0.671);
 
 pub const FONT: &str = "fonts/main.otf";
 pub const FONT_TITLE: &str = "fonts/title.otf";
