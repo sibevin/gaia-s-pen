@@ -54,7 +54,7 @@ const MENU_PAGES: [&dyn PageBase; 4] = [
     &game::Page,
     &help::Page,
     &settings::audio::Page,
-    &about::Page,
+    &about::main::Page,
 ];
 
 fn page_enter(mut commands: Commands, asset_server: Res<AssetServer>) {

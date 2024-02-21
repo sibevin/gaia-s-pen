@@ -172,7 +172,12 @@ fn build_current_tab(parent: &mut ChildBuilder, asset_server: &Res<AssetServer>,
                 height: Val::Auto,
                 justify_content: JustifyContent::Center,
                 align_items: AlignItems::Center,
-                padding: UiRect::all(ui::px_p(ui::BTN_PADDING * 0.6)),
+                padding: UiRect::new(
+                    ui::px_p(ui::BTN_PADDING * 0.6),
+                    ui::px_p(ui::BTN_PADDING * 0.6),
+                    ui::px_p(ui::BTN_PADDING * 0.3),
+                    ui::px_p(ui::BTN_PADDING * 0.6),
+                ),
                 ..default()
             },
             background_color: theme::BTN_BG.into(),

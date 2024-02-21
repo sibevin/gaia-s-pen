@@ -153,7 +153,7 @@ fn build_sep_title(
                 width: ui::px_p(SEP_W),
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::Center,
-                margin: UiRect::top(ui::px_p(5.0)),
+                margin: UiRect::vertical(ui::px_p(5.0)),
                 ..default()
             },
             ..default()
