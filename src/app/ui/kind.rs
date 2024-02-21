@@ -69,9 +69,8 @@ pub struct AppUiCanvas;
 pub fn create_ui_canvas(commands: &mut Commands) -> AppUiCanvasEntityMap {
     let root_entity = commands
         .spawn((
-            SpriteBundle {
+            SpatialBundle {
                 transform: Transform::from_xyz(0.0, 0.0, UI_CANVAS_Z_INDEX),
-                sprite: Sprite { ..default() },
                 ..default()
             },
             AppUiCanvas,
@@ -82,16 +81,14 @@ pub fn create_ui_canvas(commands: &mut Commands) -> AppUiCanvasEntityMap {
     if let Some(mut entity_commands) = commands.get_entity(root_entity) {
         entity_commands.with_children(|parent| {
             bg_entity = parent
-                .spawn(SpriteBundle {
+                .spawn(SpatialBundle {
                     transform: Transform::from_xyz(0.0, 0.0, UI_CANVAS_Z_INDEX + 0.1),
-                    sprite: Sprite::default(),
                     ..default()
                 })
                 .id();
             fg_entity = parent
-                .spawn(SpriteBundle {
+                .spawn(SpatialBundle {
                     transform: Transform::from_xyz(0.0, 0.0, UI_CANVAS_Z_INDEX + 0.2),
-                    sprite: Sprite::default(),
                     ..default()
                 })
                 .id();
