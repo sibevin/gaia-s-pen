@@ -1,5 +1,5 @@
 use super::*;
-use crate::{app::anime_effect, app::interaction, app::ui};
+use crate::{app::anime_effect, app::cursor_icon, app::interaction, app::ui};
 use bevy_mod_picking::prelude::*;
 use bevy_persistent::prelude::*;
 use bevy_prototype_lyon::prelude::*;
@@ -76,6 +76,9 @@ struct OnPage;
 
 #[derive(Component)]
 struct DemoPanel;
+
+#[derive(Component)]
+struct DemoPanelUi;
 
 #[derive(Component)]
 struct DemoControlThumb;
@@ -212,18 +215,35 @@ fn page_enter(
                                         },
                                     );
                                 });
-                            parent.spawn((
-                                NodeBundle {
-                                    style: Style {
-                                        width: ui::px_p(DEMO_PANEL_SIZE),
-                                        height: ui::px_p(DEMO_PANEL_SIZE),
+                            parent
+                                .spawn((
+                                    NodeBundle {
+                                        style: Style {
+                                            align_items: AlignItems::Center,
+                                            justify_content: JustifyContent::Center,
+                                            width: ui::px_p(DEMO_PANEL_SIZE),
+                                            height: ui::px_p(DEMO_PANEL_SIZE),
+                                            ..default()
+                                        },
                                         ..default()
                                     },
-                                    ..default()
-                                },
-                                Pickable::IGNORE,
-                                app::interaction::IaCrossPanel,
-                            ));
+                                    Pickable::IGNORE,
+                                ))
+                                .with_children(|parent| {
+                                    parent.spawn((
+                                        NodeBundle {
+                                            style: Style {
+                                                width: ui::px_p(1.0),
+                                                height: ui::px_p(1.0),
+                                                ..default()
+                                            },
+                                            ..default()
+                                        },
+                                        Pickable::IGNORE,
+                                        DemoPanelUi,
+                                        Focusable::default(),
+                                    ));
+                                });
                         });
                     build_settings_nav_bar(parent, &asset_server, PageState::SettingsControl);
                 });
@@ -285,11 +305,11 @@ fn build_demo_control_thumb(parent: &mut ChildBuilder, asset_server: &Res<AssetS
             Fill::color(Color::rgba(0.0, 0.0, 0.0, 0.0)),
             DemoControlThumb,
             PickableBundle::default(),
-            On::<Pointer<DragStart>>::target_insert(Pickable::IGNORE),
-            On::<Pointer<DragEnd>>::target_insert(Pickable::default()),
+            On::<Pointer<DragStart>>::run(handle_demo_thumb_start_dragging),
+            On::<Pointer<DragEnd>>::run(handle_demo_thumb_end_dragging),
             On::<Pointer<Drag>>::run(handle_demo_dragging),
-            On::<Pointer<Over>>::run(handle_demo_thumb_selection),
-            On::<Pointer<Out>>::run(handle_demo_thumb_deselection),
+            On::<Pointer<Over>>::run(handle_demo_thumb_over),
+            On::<Pointer<Out>>::run(handle_demo_thumb_out),
         ))
         .with_children(|parent| {
             let geo_builder = GeometryBuilder::new().add(&circle);
@@ -336,6 +356,7 @@ fn handle_demo_dragging(
     status: Res<app::status::AppStatus>,
     mut commands: Commands,
     circle_query: Query<Entity, (With<DemoControlCircle>, Without<DemoControlThumb>)>,
+    mut cursor_icon_query: Query<&mut cursor_icon::AppCursorIcon>,
 ) {
     let moving_ratio = if status.in_modified_sensitivity {
         settings.get_value("sensitivity_modified") as f32 / 50.0
@@ -349,7 +370,7 @@ fn handle_demo_dragging(
             transform.translation.y -= event.delta.y * moving_ratio;
             for &child in children.iter() {
                 if let Ok((entity, _)) = thumb_selection_query.get(child) {
-                    draw_thumb_selection(&mut commands, entity);
+                    draw_thumb_selection(&mut commands, entity, status.in_modified_sensitivity);
                 }
             }
         }
@@ -358,25 +379,77 @@ fn handle_demo_dragging(
     let circle_entity = circle_query.single();
     let thumb_pos = (thumb_trans[0], thumb_trans[1]);
     draw_demo_circle(&mut commands, circle_entity, thumb_pos);
+    cursor_icon::hide_curosr_icon(&mut cursor_icon_query);
 }
 
-fn handle_demo_thumb_selection(
+fn handle_demo_thumb_start_dragging(
+    event: Listener<Pointer<DragStart>>,
+    mut thumb_query: Query<(Entity, &mut Pickable), With<DemoControlThumb>>,
+    mut cursor_icon_query: Query<&mut cursor_icon::AppCursorIcon>,
+) {
+    for (entity, mut pickable) in thumb_query.iter_mut() {
+        if entity == event.target {
+            *pickable = Pickable::IGNORE;
+            cursor_icon::hide_curosr_icon(&mut cursor_icon_query);
+        }
+    }
+}
+
+fn handle_demo_thumb_end_dragging(
+    event: Listener<Pointer<DragEnd>>,
+    mut commands: Commands,
+    mut thumb_query: Query<(Entity, &mut Pickable), With<DemoControlThumb>>,
+    mut cursor_icon_query: Query<&mut cursor_icon::AppCursorIcon>,
+    thumb_selection_query: Query<
+        (Entity, &Parent),
+        (With<DemoControlThumbSelection>, Without<DemoControlThumb>),
+    >,
+) {
+    for (entity, mut pickable) in thumb_query.iter_mut() {
+        if entity == event.target {
+            *pickable = Pickable::default();
+            cursor_icon::reset_curosr_icon(&mut cursor_icon_query);
+        }
+    }
+    for (entity, parent) in thumb_selection_query.iter() {
+        if parent.get() == event.target {
+            if let Some(mut entity_commands) = commands.get_entity(entity) {
+                entity_commands.despawn_descendants();
+                cursor_icon::reset_curosr_icon(&mut cursor_icon_query);
+            }
+        }
+    }
+}
+
+fn handle_demo_thumb_over(
     event: Listener<Pointer<Over>>,
     mut commands: Commands,
     thumb_selection_query: Query<
         (Entity, &Parent),
         (With<DemoControlThumbSelection>, Without<DemoControlThumb>),
     >,
+    mut cursor_icon_query: Query<&mut cursor_icon::AppCursorIcon>,
+    demo_panel_ui_query: Query<Entity, With<DemoPanelUi>>,
+    mut requests: EventWriter<NavRequest>,
+    status: Res<app::status::AppStatus>,
 ) {
     for (entity, parent) in thumb_selection_query.iter() {
         if parent.get() == event.target {
-            draw_thumb_selection(&mut commands, entity);
+            draw_thumb_selection(&mut commands, entity, status.in_modified_sensitivity);
+            cursor_icon::set_curosr_icon(
+                &mut cursor_icon_query,
+                cursor_icon::AppCursorIconKind::Pointer,
+            );
+            if let Ok(dpu_entity) = demo_panel_ui_query.get_single() {
+                requests.send(NavRequest::FocusOn(dpu_entity));
+            }
         }
     }
 }
 
-fn draw_thumb_selection(commands: &mut Commands, thumb_entity: Entity) {
+fn draw_thumb_selection(commands: &mut Commands, thumb_entity: Entity, is_modified: bool) {
     if let Some(mut entity_commands) = commands.get_entity(thumb_entity) {
+        let line_w_ratio = if is_modified { 3.0 } else { 2.0 };
         let circle = shapes::Circle {
             radius: DEMO_CONTROL_R * 1.5,
             center: Vec2::ZERO,
@@ -389,25 +462,27 @@ fn draw_thumb_selection(commands: &mut Commands, thumb_entity: Entity) {
                     path: geo_builder.build(),
                     ..default()
                 },
-                Stroke::new(theme::CONTROL_COLOR.with_a(0.8), DEMO_LINE_W * 2.0),
+                Stroke::new(theme::CONTROL_COLOR.with_a(0.8), DEMO_LINE_W * line_w_ratio),
                 Pickable::IGNORE,
             ));
         });
     }
 }
 
-fn handle_demo_thumb_deselection(
+fn handle_demo_thumb_out(
     event: Listener<Pointer<Out>>,
     mut commands: Commands,
     thumb_selection_query: Query<
         (Entity, &Parent),
         (With<DemoControlThumbSelection>, Without<DemoControlThumb>),
     >,
+    mut cursor_icon_query: Query<&mut cursor_icon::AppCursorIcon>,
 ) {
     for (entity, parent) in thumb_selection_query.iter() {
         if parent.get() == event.target {
             if let Some(mut entity_commands) = commands.get_entity(entity) {
                 entity_commands.despawn_descendants();
+                cursor_icon::reset_curosr_icon(&mut cursor_icon_query);
             }
         }
     }
