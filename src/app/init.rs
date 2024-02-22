@@ -1,7 +1,7 @@
 use crate::app;
 use bevy::{
     prelude::*,
-    window::{Cursor, CursorIcon, PresentMode, WindowMode, WindowTheme},
+    window::{Cursor, PresentMode, WindowMode, WindowTheme},
 };
 use bevy_persistent::prelude::*;
 
@@ -21,10 +21,10 @@ impl Plugin for InitPlugin {
                         window_theme: Some(WindowTheme::Dark),
                         enabled_buttons: bevy::window::EnabledButtons {
                             maximize: false,
-                            ..Default::default()
+                            ..default()
                         },
                         cursor: Cursor {
-                            icon: CursorIcon::Crosshair,
+                            visible: false,
                             ..default()
                         },
                         ..default()
@@ -41,6 +41,7 @@ impl Plugin for InitPlugin {
                 app::interaction::InteractionPlugin,
                 app::anime_effect::AnimeEffectPlugin,
                 app::cursor::AppCursorPlugin,
+                app::cursor_icon::AppCursorIconPlugin,
             ));
     }
 }
@@ -65,4 +66,7 @@ pub fn startup(
 
     // camera
     commands.spawn(Camera2dBundle::default());
+
+    // cursor icon
+    app::cursor_icon::init_cursor_icon(&mut commands, &asset_server);
 }

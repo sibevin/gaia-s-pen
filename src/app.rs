@@ -2,6 +2,7 @@ pub mod achievement;
 pub mod anime_effect;
 pub mod audio;
 pub mod cursor;
+pub mod cursor_icon;
 pub mod init;
 pub mod interaction;
 pub mod key_binding;
