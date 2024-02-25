@@ -3,16 +3,20 @@ pub mod anime_effect;
 pub mod audio;
 pub mod cursor;
 pub mod cursor_icon;
-pub mod init;
 pub mod interaction;
 pub mod key_binding;
 pub mod leaderboard;
+pub mod plugin;
 pub mod screenshot;
 pub mod settings;
+pub mod startup;
 pub mod status;
 pub mod theme;
 pub mod timer;
 pub mod ui;
+
+pub use plugin::AppPlugin;
+pub use startup::startup;
 
 pub const WINDOW_W: f32 = 1280.0;
 pub const WINDOW_H: f32 = 720.0;

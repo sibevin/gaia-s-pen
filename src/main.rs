@@ -1,4 +1,3 @@
-use bevy::asset::AssetMetaCheck;
 use bevy::prelude::*;
 use bevy_prototype_lyon::prelude::*;
 use bevy_tweening::*;
@@ -8,11 +7,9 @@ use gaia_s_pen::{app, book};
 
 fn main() {
     App::new()
-        .insert_resource(ClearColor(app::theme::BG_COLOR))
-        .insert_resource(AssetMetaCheck::Never)
-        .add_systems(Startup, app::init::startup)
+        .add_systems(Startup, app::startup)
         .add_plugins((
-            app::init::InitPlugin,
+            app::AppPlugin,
             ShapePlugin,
             DefaultNavigationPlugins,
             TweeningPlugin,

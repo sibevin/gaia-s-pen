@@ -15,20 +15,6 @@ pub trait PageBase {
     fn build(&self, app: &mut App);
 }
 
-fn fetch_page(code: &str) -> &dyn PageBase {
-    for page in PAGES {
-        if page.code() == code {
-            return page;
-        }
-    }
-    panic!("Invalid page code")
-}
-
-fn fetch_page_icon_path(code: &str) -> String {
-    let page = fetch_page(code);
-    format!("images/icons/{}.png", page.icon())
-}
-
 const PAGE_TITLE_RATIO: f32 = 1.2;
 const SEP_W: f32 = 100.0;
 
